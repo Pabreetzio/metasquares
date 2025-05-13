@@ -1,16 +1,18 @@
+import { on } from "events";
 import { BoardWell } from "./BoardWell";
+import { useState } from 'react';   
 
-enum Player {
-    Player1 = "X",
-    Player2 = "O",
-}
-interface WellProps {
-    row: number;
-    col: number;
-    marble?: Player;
-  }
-    
-export function GameBoard() {
+import { Player } from '../types/Player.types.js';
+
+export function GameBoard({boardState, onPlay} : {boardState: Player[][], onPlay: (row: number, col: number) => void}) {
+    const handleWellClick = (row: number, col: number) => {
+        return () => {
+            if (boardState[row][col] === Player.None) {
+                onPlay(row, col);
+                console.log(boardState);
+            }
+        };
+    };
   return (
     <svg width="600" height="600" viewBox="0 0 400 400">
     <defs>
@@ -28,21 +30,13 @@ export function GameBoard() {
       </radialGradient>
 
     </defs>
-    {[...Array(8)].map((_, row) =>
-      [...Array(8)].map((_, col) => {
-        let wellProps: WellProps = {
-            row: row,
-            col: col
-            };
-            if (row === 0 && col === 0) {
-                wellProps.marble = Player.Player1;
-            }
-            else if (row === 0 && col === 1) {
-                wellProps.marble = Player.Player2;
-            }
-       return <BoardWell  row={row} col={col} marble={wellProps.marble}></BoardWell>;
-      })
-    )}
+    {[boardState.map((row, rowIndex) => 
+        row.map((player, colIndex) => {
+            return <BoardWell 
+            key={`board-well-${rowIndex}-${colIndex}`} row={rowIndex} col={colIndex} player={player} onWellClick={handleWellClick(rowIndex,colIndex)}></BoardWell>;
+        })
+    )]}
+
   </svg>
   );
 }

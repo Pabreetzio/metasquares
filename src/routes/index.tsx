@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { GameBoard } from '~/components/GameBoard.js'
+import { Game } from '~/components/Game.js'
 export const Route = createFileRoute('/')({
   component: Home,
 })
@@ -7,7 +7,7 @@ export const Route = createFileRoute('/')({
 function Home() {
   return (
     <div className="mx-auto max-w-2xl p-4 flex flex-col gap-4">
-      <GameBoard></GameBoard>
+      <Game></Game>
       <h2>🎯 What is Metasquares?</h2>
       <p>Metasquares is a turn-based game played on a grid where players compete to form squares using their claimed spots. It rewards tactical placement and long-term planning.</p>
 
