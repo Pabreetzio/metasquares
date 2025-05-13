@@ -107,16 +107,16 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             }}
             activeOptions={{ exact: true }}
           >
-            Home
+            Metasquares
           </Link>{' '}
-          <Link
+          {/* <Link 
             to="/posts"
             activeProps={{
-              className: 'font-bold',
+              className: 'font-bold'
             }}
           >
             Posts
-          </Link>
+          </Link> */}
           <div className="ml-auto">
             <SignedIn>
               <UserButton />
