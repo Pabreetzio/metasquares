@@ -10,25 +10,17 @@ export function Game() {
         const [boardState, setBoardState] = useState(Array(8).fill(Player.None).map(() => Array(8).fill(Player.None)));
         const [currentPlayer, setCurrentPlayer] = useState(Player.Player1);
         const [metaSquares, setMetasquares] = useState([] as MetaSquare[]);
+        const [currentScore, setCurrentScore] = useState({[Player.Player1]: 0, [Player.Player2]: 0} as {[Player.Player1]: number, [Player.Player2]: number});
         const newGame = () => {
             setBoardState(Array(8).fill(Player.None).map(() => Array(8).fill(Player.None)));
             setCurrentPlayer(Player.Player1);
-
+            setCurrentScore({ [Player.Player1]: 0, [Player.Player2]: 0});
             let metaSquares: MetaSquare[] = [
             ];
             setMetasquares(metaSquares);
         }
-        const inExistingSquare = (newSquare: Square, existingSquares: Square[]) => {
-            return existingSquares.some((existingSquare) => {
-                return newSquare.every(newSquarePoint => {
-                    return existingSquare.some(existingSquarePoint => {
-                        return newSquarePoint.x === existingSquarePoint.x && newSquarePoint.y === existingSquarePoint.y;
-                    });
-                });
-            });
 
-        }
-        const getNewSquares3 = (moveRow: number, moveCol: number, currentPlayer: Player,  boardState: Player[][]) => {
+        const getNewSquares = (moveRow: number, moveCol: number, currentPlayer: Player,  boardState: Player[][]) => {
             let newSquares: MetaSquare[] = [];
             for (let dx = 0; dx < boardState.length; dx++) {
                 for(let dy = 1; dy < boardState.length - dx; dy++) { //assumes square board
@@ -88,7 +80,7 @@ export function Game() {
                 outOfBounds = true;
                 break;
             }
-            if ((boardState[point.y])[point.x] !== currentPlayer) {
+            if (boardState[point.y][point.x] !== currentPlayer) {
                 ownedByCurrentPlayer = false;
                 break;
             }
@@ -101,9 +93,21 @@ export function Game() {
             const newBoardState = [...boardState];
             newBoardState[row][col] = currentPlayer;
             setBoardState(newBoardState);
-            const newSquares = getNewSquares3(row, col, currentPlayer, newBoardState);
+            const newSquares = getNewSquares(row, col, currentPlayer, newBoardState);
             const newMetaSquares = [...metaSquares, ...newSquares];
             setMetasquares(newMetaSquares);
+            let newScore = currentScore;
+            if (newSquares.length > 0) {
+                for (let i = 0; i < newSquares.length; i++) {
+                    const square = newSquares[i].square;
+                    const size = (Math.abs(square[0].x - square[1].x) + Math.abs(square[0].y - square[1].y)+1);
+                    const area = size * size;
+                    if (currentPlayer !== Player.None) {
+                        newScore[currentPlayer] += area;
+                    }
+                }
+            }
+            setCurrentScore(newScore);
                         
 
             if (currentPlayer === Player.Player1) {
@@ -117,6 +121,11 @@ export function Game() {
     return (
         <>
         <GameBoard boardState={boardState} metaSquares={metaSquares} onPlay={handlePlay}></GameBoard>
+        <div>
+            <h2>Score</h2>
+            <div>{Player.Player1}: {currentScore[Player.Player1]}</div>
+            <div>{Player.Player2}: {currentScore[Player.Player2]}</div>
+        </div>
         <button onClick={newGame}>New Game</button>
         <div>Current Player: {currentPlayer}</div>
         </>
