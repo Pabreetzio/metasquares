@@ -11,7 +11,9 @@ export function Game() {
         const [currentPlayer, setCurrentPlayer] = useState(Player.Player1);
         const [metaSquares, setMetasquares] = useState([] as MetaSquare[]);
         const [currentScore, setCurrentScore] = useState({[Player.Player1]: 0, [Player.Player2]: 0} as {[Player.Player1]: number, [Player.Player2]: number});
+        const [winner, setWinner] = useState(null as Player | null);
         const newGame = () => {
+            setWinner(null);
             setBoardState(Array(8).fill(Player.None).map(() => Array(8).fill(Player.None)));
             setCurrentPlayer(Player.Player1);
             setCurrentScore({ [Player.Player1]: 0, [Player.Player2]: 0});
@@ -108,7 +110,10 @@ export function Game() {
                 }
             }
             setCurrentScore(newScore);
-                        
+            let otherPlayer = currentPlayer === Player.Player1 ? Player.Player2 : Player.Player1;
+            if (currentPlayer !== Player.None && currentScore[currentPlayer] >= 150 && currentScore[currentPlayer] > (currentScore[otherPlayer]+15)) {
+                setWinner(currentPlayer);
+            }
 
             if (currentPlayer === Player.Player1) {
                 setCurrentPlayer(Player.Player2);
@@ -119,8 +124,8 @@ export function Game() {
         }
 
     return (
-        <>
-        <GameBoard boardState={boardState} metaSquares={metaSquares} onPlay={handlePlay}></GameBoard>
+        <div id="game">
+        <GameBoard boardState={boardState} metaSquares={metaSquares} onPlay={handlePlay} winner={winner} onNewGame={newGame}></GameBoard>
         <div>
             <h2>Score</h2>
             <div>{Player.Player1}: {currentScore[Player.Player1]}</div>
@@ -128,6 +133,6 @@ export function Game() {
         </div>
         <button onClick={newGame}>New Game</button>
         <div>Current Player: {currentPlayer}</div>
-        </>
+        </div>
     );
 }

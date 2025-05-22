@@ -7,7 +7,8 @@ import { useState } from 'react';
 import { Player } from '../types/Player.types.js';
 import { MetaSquare } from '../types/MetaSquare.types.js';
 
-export function GameBoard({boardState, metaSquares, onPlay} : {boardState: Player[][], metaSquares: MetaSquare[], onPlay: (row: number, col: number) => void}) {
+export function GameBoard({boardState, metaSquares, onPlay, winner, onNewGame} : 
+  {boardState: Player[][], metaSquares: MetaSquare[], onPlay: (row: number, col: number) => void, winner: string | null, onNewGame: () => void}) {
     const handleWellClick = (row: number, col: number) => {
         return () => {
             if (boardState[row][col] === Player.None) {
@@ -16,8 +17,11 @@ export function GameBoard({boardState, metaSquares, onPlay} : {boardState: Playe
             }
         };
     };
+    const handleNewGame = () => {
+        onNewGame();
+    }
   return (
-    <svg width="600" height="600" viewBox="0 0 400 400">
+    <svg id="game-board" width="600" height="600" viewBox="0 0 400 400">
     <defs>
       <radialGradient id="well-gradient" cx="70%" cy="70%" r="70%" fx="70%" fy="70%">
         <stop offset="0%" stopColor="#ffffff66" />
@@ -52,6 +56,17 @@ export function GameBoard({boardState, metaSquares, onPlay} : {boardState: Playe
           <PlayerMarble key={`player-marble-${rowIndex}-${colIndex}`} row={rowIndex} col={colIndex} player={player} ></PlayerMarble>;
         })
       )]}
+
+    {  
+      winner != null && <foreignObject x="0" y="0" width="100%" height="100%">
+
+<div className="w-full h-full flex items-center justify-center">
+    <div className="bg-white/90 dark:bg-black/80 px-6 py-4 rounded-xl shadow-md text-center">
+      <p className="text-2xl font-bold text-center text-current m-2">{winner} Wins!</p>
+      <button type="button" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded" onClick={handleNewGame}>New Game</button>
+    </div>    </div>
+  </foreignObject>
+    }
 
   </svg>
   );
