@@ -39,77 +39,92 @@ export function GameBoard({
 
   return (
     <View style={styles.container}>
-      <Svg width={boardSize} height={boardSize} viewBox={`0 0 ${boardSize} ${boardSize}`}>
-        <Defs>
-          {Object.values(SVG_GRADIENTS).map((gradient) => (
-            <RadialGradient
-              key={gradient.id}
-              id={gradient.id}
-              cx={gradient.cx}
-              cy={gradient.cy}
-              r={gradient.r}
-              fx={gradient.fx}
-              fy={gradient.fy}
-            >
-              {gradient.stops.map((stop, idx) => (
-                <Stop key={idx} offset={stop.offset} stopColor={stop.color} />
-              ))}
-            </RadialGradient>
-          ))}
-        </Defs>
+      <View style={{ position: 'relative', width: boardSize, height: boardSize }}>
+        <Svg width={boardSize} height={boardSize} viewBox={`0 0 ${boardSize} ${boardSize}`}>
+          <Defs>
+            {Object.values(SVG_GRADIENTS).map((gradient) => (
+              <RadialGradient
+                key={gradient.id}
+                id={gradient.id}
+                cx={gradient.cx}
+                cy={gradient.cy}
+                r={gradient.r}
+                fx={gradient.fx}
+                fy={gradient.fy}
+              >
+                {gradient.stops.map((stop, idx) => (
+                  <Stop key={idx} offset={stop.offset} stopColor={stop.color} />
+                ))}
+              </RadialGradient>
+            ))}
+          </Defs>
 
-        {/* Draw wells */}
-        {boardState.map((row, rowIndex) =>
-          row.map((_, colIndex) => (
-            <BoardWell
-              key={`well-${rowIndex}-${colIndex}`}
-              row={rowIndex}
-              col={colIndex}
-              cellSize={cellSize}
+          {/* Draw wells */}
+          {boardState.map((row, rowIndex) =>
+            row.map((_, colIndex) => (
+              <BoardWell
+                key={`well-${rowIndex}-${colIndex}`}
+                row={rowIndex}
+                col={colIndex}
+                cellSize={cellSize}
+              />
+            ))
+          )}
+
+          {/* Draw squares */}
+          {metaSquares.map((metaSquare, index) => (
+            <Path
+              key={`square-${index}`}
+              d={metaSquare.square.toSvgPath(cellSize)}
+              fill="transparent"
+              stroke={getPlayerStrokeColor(metaSquare.player)}
+              strokeWidth="2"
             />
-          ))
-        )}
+          ))}
 
-        {/* Draw squares */}
-        {metaSquares.map((metaSquare, index) => (
-          <Path
-            key={`square-${index}`}
-            d={metaSquare.square.toSvgPath(cellSize)}
-            fill="transparent"
-            stroke={getPlayerStrokeColor(metaSquare.player)}
-            strokeWidth="2"
-          />
-        ))}
-
-        {/* Draw marbles and hitboxes */}
-        {boardState.map((row, rowIndex) =>
-          row.map((player, colIndex) => {
-            const { cx, cy } = getCellCenter(rowIndex, colIndex, cellSize);
-            const radius = getWellRadius(cellSize);
-
-            return (
-              <React.Fragment key={`cell-${rowIndex}-${colIndex}`}>
-                {player !== Player.None ? (
+          {/* Draw marbles */}
+          {boardState.map((row, rowIndex) =>
+            row.map((player, colIndex) => {
+              return (
+                player !== Player.None && (
                   <PlayerMarble
+                    key={`marble-${rowIndex}-${colIndex}`}
                     row={rowIndex}
                     col={colIndex}
                     player={player}
                     cellSize={cellSize}
                   />
-                ) : (
-                  <Circle
-                    cx={cx}
-                    cy={cy}
-                    r={radius}
-                    fill="transparent"
-                    onPress={() => handleWellPress(rowIndex, colIndex)}
-                  />
-                )}
-              </React.Fragment>
+                )
+              );
+            })
+          )}
+        </Svg>
+
+        {/* Overlay touch hitboxes */}
+        {boardState.map((row, rowIndex) =>
+          row.map((player, colIndex) => {
+            if (player !== Player.None) return null;
+
+            const { cx, cy } = getCellCenter(rowIndex, colIndex, cellSize);
+            const radius = getWellRadius(cellSize);
+
+            return (
+              <TouchableOpacity
+                key={`hitbox-${rowIndex}-${colIndex}`}
+                style={{
+                  position: 'absolute',
+                  left: cx - radius,
+                  top: cy - radius,
+                  width: radius * 2,
+                  height: radius * 2,
+                }}
+                onPress={() => handleWellPress(rowIndex, colIndex)}
+                activeOpacity={0.7}
+              />
             );
           })
         )}
-      </Svg>
+      </View>
 
       {winner && (
         <View style={styles.winnerOverlay}>
