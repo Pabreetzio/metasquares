@@ -1,10 +1,8 @@
-import { on } from "events";
 import { BoardWell } from "./BoardWell";
 import { WellHitbox } from "./WellHitbox";
 import { PlayerMarble } from "./PlayerMarble";
-import { useState } from 'react';   
 
-import { Player, MetaSquare } from '@metasquares/shared';
+import { Player, MetaSquare, getPlayerStrokeColor, DEFAULT_CELL_SIZE } from '@metasquares/shared';
 
 export function GameBoard({boardState, metaSquares, onPlay, winner, onNewGame} : 
   {boardState: Player[][], metaSquares: MetaSquare[], onPlay: (row: number, col: number) => void, winner: string | null, onNewGame: () => void}) {
@@ -43,8 +41,7 @@ export function GameBoard({boardState, metaSquares, onPlay, winner, onNewGame} :
     )]}
     
     {[metaSquares.map((metaSquare, index) => {
-        const strokeColor = metaSquare.player === Player.Player1 ? "#ff0000" : "#0000ff";
-        return <path key={`meta-square-${index}`} d={metaSquare.square.toSvgPath(50)} fill="transparent" stroke={strokeColor} strokeWidth="2" />;
+        return <path key={`meta-square-${index}`} d={metaSquare.square.toSvgPath(DEFAULT_CELL_SIZE)} fill="transparent" stroke={getPlayerStrokeColor(metaSquare.player)} strokeWidth="2" />;
     })]}
     {/* <path key={`meta-square-3`} d="M 75 25 L 375 75 L 325 375 L 25 325 Z" fill="transparent" stroke="red" strokeWidth="2" /> */}
     {[boardState.map((row, rowIndex) => 

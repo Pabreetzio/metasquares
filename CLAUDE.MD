@@ -33,6 +33,12 @@ C:\Projects\metasquares\
 │   │   └── package.json     # Web app dependencies
 │   │
 │   └── mobile/              # React Native (Expo) mobile application
+│       ├── src/
+│       │   └── components/  # React Native components
+│       │       ├── Game.tsx         # Main game container (uses shared hook)
+│       │       ├── GameBoard.tsx    # SVG-based board rendering
+│       │       ├── BoardWell.tsx    # Individual well/cell
+│       │       └── PlayerMarble.tsx # Player marker visualization
 │       ├── App.tsx          # Main app component
 │       ├── app.json         # Expo configuration
 │       ├── tsconfig.json    # TypeScript config for mobile app
@@ -46,6 +52,8 @@ C:\Projects\metasquares\
 │   │   │   │   ├── Point.types.ts    # Point type (x, y coordinates)
 │   │   │   │   ├── Square.types.ts   # Square class (4 points)
 │   │   │   │   └── MetaSquare.types.ts # MetaSquare type
+│   │   │   ├── hooks/       # Shared React hooks
+│   │   │   │   └── useGameLogic.ts   # Core game logic hook
 │   │   │   └── index.ts     # Package exports
 │   │   ├── tsconfig.json    # TypeScript config for shared package
 │   │   └── package.json     # Shared package config
@@ -71,8 +79,9 @@ C:\Projects\metasquares\
 
 ### Mobile App (@metasquares/mobile)
 - **Framework**: React Native 0.81.5 with Expo 54
+- **SVG Rendering**: react-native-svg
 - **Language**: TypeScript
-- **Authentication**: Clerk for Expo
+- **Authentication**: Clerk for Expo (not yet integrated)
 
 ### Shared Packages
 - **@metasquares/shared**: Game types and logic shared between web and mobile
@@ -81,7 +90,7 @@ C:\Projects\metasquares\
 
 ## Game Logic
 
-### Core Game Rules (as implemented in `apps/web/src/components/Game.tsx`)
+### Core Game Rules (implemented in `packages/shared/src/hooks/useGameLogic.ts`)
 
 1. **Board**: 8x8 grid, initialized with `Player.None`
 2. **Players**: Two players (Player1 = red, Player2 = blue)
@@ -90,7 +99,25 @@ C:\Projects\metasquares\
 5. **Scoring**: Each square scores points = (size × size), where size is the perimeter distance
 6. **Win Condition**: First player to reach 150+ points with a 15+ point lead wins
 
-### Key Game Functions
+### Shared Game Logic Hook
+
+The game logic is now centralized in `useGameLogic()` hook in the shared package:
+
+```typescript
+import { useGameLogic } from '@metasquares/shared';
+
+const {
+  boardState,      // 2D array of Player values
+  currentPlayer,   // Current player's turn
+  metaSquares,     // Array of formed squares
+  currentScore,    // Score object for both players
+  winner,          // Winning player (null if ongoing)
+  handlePlay,      // Function to handle a move
+  newGame          // Function to reset the game
+} = useGameLogic();
+```
+
+### Key Internal Functions
 
 - `handlePlay(row, col)`: Processes a player's move
 - `getNewSquares(moveRow, moveCol, currentPlayer, boardState)`: Finds all new squares formed by a move
@@ -111,7 +138,14 @@ All game types are now in `@metasquares/shared` and used by both apps:
 
 ```typescript
 // Available exports from @metasquares/shared
-import { Player, Square, MetaSquare, Point } from '@metasquares/shared';
+import {
+  Player,
+  Square,
+  MetaSquare,
+  Point,
+  useGameLogic,
+  GameState
+} from '@metasquares/shared';
 
 // Player enum
 enum Player {
@@ -133,16 +167,29 @@ type MetaSquare = {
   square: Square;
   player: Player;
 };
+
+// Game logic hook
+function useGameLogic(): {
+  boardState: Player[][];
+  currentPlayer: Player;
+  metaSquares: MetaSquare[];
+  currentScore: { [Player.Player1]: number; [Player.Player2]: number };
+  winner: Player | null;
+  handlePlay: (row: number, col: number) => void;
+  newGame: () => void;
+};
 ```
 
 ## State Management
 
-Current state is managed locally with React `useState`:
+Game state is now managed through the shared `useGameLogic()` hook, which uses React `useState` internally:
 - `boardState`: 2D array tracking well ownership
 - `currentPlayer`: Which player's turn it is
 - `metaSquares`: Array of all formed squares
 - `currentScore`: Score object for both players
 - `winner`: Winning player (null if game ongoing)
+
+Both web and mobile apps use the same hook for consistent game behavior.
 
 ## Convex Backend
 
@@ -230,38 +277,40 @@ TypeScript path mappings are configured in each app's `tsconfig.json`.
 
 ### ✅ Completed
 - Monorepo structure with npm workspaces
-- Basic game board rendering (web)
-- Player marble placement (web)
-- Square detection algorithm (web)
-- Win condition logic (web)
-- Score calculation (web)
-- Visual feedback for squares formed (web)
-- New game functionality (web)
+- Basic game board rendering (web & mobile)
+- Player marble placement (web & mobile)
+- Square detection algorithm (shared)
+- Win condition logic (shared)
+- Score calculation (shared)
+- Visual feedback for squares formed (web & mobile)
+- New game functionality (web & mobile)
 - Shared types package
+- **Shared game logic hook (useGameLogic)**
+- **React Native app with full game UI**
+- **SVG rendering with react-native-svg**
 - React Native app scaffolding (Expo)
 - Convex moved to shared location
 
 ### 🚧 In Progress
-- Mobile app implementation (blank slate currently)
 - Convex backend integration (directory exists, minimal implementation)
 - Clerk authentication setup (dependencies installed, not integrated)
 
 ### 📋 Planned Features
-- Port game UI to React Native
 - Real-time multiplayer via Convex
 - User authentication and profiles (Clerk)
 - Game lobbies and matchmaking
 - Spectator mode
 - Game history and replays
 - Cross-platform play (web vs mobile)
+- Mobile-specific optimizations (gestures, haptics)
 
 ## Known Issues
 
 - Game state is client-only (no persistence)
 - No multiplayer support yet
-- Mobile app is blank - needs game components ported from web
 - Clerk authentication routes exist but aren't fully connected
 - `tasks` query in Convex is sample code, not used by game
+- Mobile app needs testing on physical devices
 
 ## Code Style Notes
 
@@ -278,9 +327,9 @@ When working on this project:
 
 1. **Monorepo Structure**: This is an npm workspaces monorepo. Always be aware of which package you're working in (web, mobile, or shared).
 
-2. **Shared Code**: Game types and logic should be in `@metasquares/shared` to be used by both web and mobile apps. Don't duplicate code between apps.
+2. **Shared Code**: Game types and logic are in `@metasquares/shared` and used by both web and mobile apps. Don't duplicate code between apps.
 
-3. **Game Logic**: The core game algorithm in `apps/web/src/components/Game.tsx` is functional. Be cautious when modifying square detection logic. This logic should eventually move to `@metasquares/shared`.
+3. **Game Logic**: The core game algorithm is now in `packages/shared/src/hooks/useGameLogic.ts` and shared between both apps. Both web and mobile use the same `useGameLogic()` hook for consistent behavior.
 
 4. **Convex Integration**: The Convex backend is in `packages/convex/` and scaffolded but not integrated. Game state should eventually move to Convex for multiplayer support.
 
@@ -290,15 +339,16 @@ When working on this project:
 
 7. **Board Coordinate System**: Uses [row][col] indexing, where [0][0] is top-left.
 
-8. **Mobile Development**: The mobile app is a blank Expo template. Game components need to be ported from web, adapting from SVG (web) to React Native views (mobile).
+8. **Mobile Development**: The mobile app now has full game UI ported from web, using react-native-svg for rendering. The game logic is shared via `useGameLogic()` hook.
 
 ## Cross-Platform Considerations
 
-When porting features from web to mobile:
-- **SVG → React Native Views**: Web uses SVG for game board, mobile will need React Native views
-- **Tailwind → StyleSheet**: Web uses Tailwind, mobile uses React Native StyleSheet
-- **Click → Touch**: Web uses click events, mobile uses touch gestures
-- **Shared Logic**: Game state management and square detection algorithm can be shared
+The apps share game logic but have platform-specific rendering:
+- **SVG Rendering**: Both apps use SVG (web: native SVG, mobile: react-native-svg)
+- **Styling**: Web uses Tailwind CSS, mobile uses React Native StyleSheet
+- **Interaction**: Web uses click events, mobile uses touch gestures (via SVG onPress)
+- **Shared Logic**: Game state management and square detection algorithm are fully shared via `useGameLogic()` hook
+- **Components**: Each platform has its own UI components that consume the shared hook
 
 ## Author
 

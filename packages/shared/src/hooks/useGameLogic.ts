@@ -1,0 +1,158 @@
+import { useState } from 'react';
+import { Player, Square, MetaSquare, Point } from '../index';
+
+export interface GameState {
+  boardState: Player[][];
+  currentPlayer: Player;
+  metaSquares: MetaSquare[];
+  currentScore: { [Player.Player1]: number; [Player.Player2]: number };
+  winner: Player | null;
+}
+
+export function useGameLogic() {
+  const [boardState, setBoardState] = useState<Player[][]>(
+    Array(8).fill(Player.None).map(() => Array(8).fill(Player.None))
+  );
+  const [currentPlayer, setCurrentPlayer] = useState<Player>(Player.Player1);
+  const [metaSquares, setMetasquares] = useState<MetaSquare[]>([]);
+  const [currentScore, setCurrentScore] = useState({
+    [Player.Player1]: 0,
+    [Player.Player2]: 0,
+  });
+  const [winner, setWinner] = useState<Player | null>(null);
+
+  const newGame = () => {
+    setWinner(null);
+    setBoardState(Array(8).fill(Player.None).map(() => Array(8).fill(Player.None)));
+    setCurrentPlayer(Player.Player1);
+    setCurrentScore({ [Player.Player1]: 0, [Player.Player2]: 0 });
+    setMetasquares([]);
+  };
+
+  const validateSquareBounds = (
+    square: Square,
+    boardState: Player[][],
+    currentPlayer: Player
+  ): boolean => {
+    let outOfBounds = false;
+    let ownedByCurrentPlayer = true;
+    for (let point of square) {
+      if (
+        point.x < 0 ||
+        point.y < 0 ||
+        point.x >= boardState.length ||
+        point.y >= boardState[0].length
+      ) {
+        outOfBounds = true;
+        break;
+      }
+      if (boardState[point.y][point.x] !== currentPlayer) {
+        ownedByCurrentPlayer = false;
+        break;
+      }
+    }
+    return !outOfBounds && ownedByCurrentPlayer;
+  };
+
+  const getNewSquares = (
+    moveRow: number,
+    moveCol: number,
+    currentPlayer: Player,
+    boardState: Player[][]
+  ): MetaSquare[] => {
+    let newSquares: MetaSquare[] = [];
+    for (let dx = 0; dx < boardState.length; dx++) {
+      for (let dy = 1; dy < boardState.length - dx; dy++) {
+        // Rotation 1
+        let point1: Point = { x: moveCol, y: moveRow };
+        let point2: Point = { x: point1.x + dx, y: point1.y + dy };
+        let point3: Point = { x: point2.x - dy, y: point2.y + dx };
+        let point4: Point = { x: point3.x - dx, y: point3.y - dy };
+
+        let square = new Square(point1, point2, point3, point4);
+        let valid = validateSquareBounds(square, boardState, currentPlayer);
+
+        if (valid) {
+          newSquares.push({ square: square, player: currentPlayer });
+        }
+
+        // Rotation 2
+        point2 = { x: point1.x - dy, y: point1.y + dx };
+        point3 = { x: point2.x - dx, y: point2.y - dy };
+        point4 = { x: point3.x + dy, y: point3.y - dx };
+        square = new Square(point1, point2, point3, point4);
+        valid = validateSquareBounds(square, boardState, currentPlayer);
+        if (valid) {
+          newSquares.push({ square: square, player: currentPlayer });
+        }
+
+        // Rotation 3
+        point2 = { x: point1.x - dx, y: point1.y - dy };
+        point3 = { x: point2.x + dy, y: point2.y - dx };
+        point4 = { x: point3.x + dx, y: point3.y + dy };
+        square = new Square(point1, point2, point3, point4);
+        valid = validateSquareBounds(square, boardState, currentPlayer);
+        if (valid) {
+          newSquares.push({ square: square, player: currentPlayer });
+        }
+
+        // Rotation 4
+        point2 = { x: point1.x + dy, y: point1.y - dx };
+        point3 = { x: point2.x + dx, y: point2.y + dy };
+        point4 = { x: point3.x - dy, y: point3.y + dx };
+        square = new Square(point1, point2, point3, point4);
+        valid = validateSquareBounds(square, boardState, currentPlayer);
+        if (valid) {
+          newSquares.push({ square: square, player: currentPlayer });
+        }
+      }
+    }
+    return newSquares;
+  };
+
+  const handlePlay = (row: number, col: number) => {
+    const newBoardState = [...boardState];
+    newBoardState[row][col] = currentPlayer;
+    setBoardState(newBoardState);
+    const newSquares = getNewSquares(row, col, currentPlayer, newBoardState);
+    const newMetaSquares = [...metaSquares, ...newSquares];
+    setMetasquares(newMetaSquares);
+    let newScore = { ...currentScore };
+    if (newSquares.length > 0) {
+      for (let i = 0; i < newSquares.length; i++) {
+        const square = newSquares[i].square;
+        const size =
+          Math.abs(square[0].x - square[1].x) + Math.abs(square[0].y - square[1].y) + 1;
+        const area = size * size;
+        if (currentPlayer !== Player.None) {
+          newScore[currentPlayer] += area;
+        }
+      }
+    }
+    setCurrentScore(newScore);
+    let otherPlayer = currentPlayer === Player.Player1 ? Player.Player2 : Player.Player1;
+    if (
+      currentPlayer !== Player.None &&
+      newScore[currentPlayer] >= 150 &&
+      newScore[currentPlayer] > newScore[otherPlayer] + 15
+    ) {
+      setWinner(currentPlayer);
+    }
+
+    if (currentPlayer === Player.Player1) {
+      setCurrentPlayer(Player.Player2);
+    } else {
+      setCurrentPlayer(Player.Player1);
+    }
+  };
+
+  return {
+    boardState,
+    currentPlayer,
+    metaSquares,
+    currentScore,
+    winner,
+    handlePlay,
+    newGame,
+  };
+}
