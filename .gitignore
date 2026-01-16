@@ -14,6 +14,15 @@ yarn.lock
 /server/build
 /public/build
 .vinxi
+
+# Web app specific
+apps/web/.output
+apps/web/.vinxi
+
+# Mobile app specific
+apps/mobile/.expo
+apps/mobile/dist
+
 # Sentry Config File
 .env.sentry-build-plugin
 /test-results/

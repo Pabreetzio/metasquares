@@ -1,4 +1,4 @@
-import { Player } from '../types/Player.types.js';
+import { Player } from '@metasquares/shared';
 
 export function WellHitbox({row, col, player, onWellClick}: {row: number, col: number, player: Player, onWellClick: () => void}) {
     const cx = 25 + col * 50;

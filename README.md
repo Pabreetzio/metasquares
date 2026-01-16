@@ -1,12 +1,13 @@
 # Metasquares
 
-A modern web implementation of the abstract strategy game **Metasquares**, built using:
+A **monorepo** containing web and mobile implementations of the abstract strategy game **Metasquares**, built using:
 
-- [TanStack Start](https://tanstack.com/start) for the frontend framework
-- [Clerk](https://clerk.dev) for authentication
-- [Convex](https://convex.dev) for the backend and real-time game data
+- **Web**: [TanStack Start](https://tanstack.com/start) - Modern React framework
+- **Mobile**: [React Native](https://reactnative.dev) with [Expo](https://expo.dev)
+- **Backend**: [Convex](https://convex.dev) - Real-time serverless backend
+- **Authentication**: [Clerk](https://clerk.dev) (planned)
 
-Hosted at: [https://metasquares.graham.tech](https://metasquares.graham.tech)
+Web app hosted at: [https://metasquares.graham.tech](https://metasquares.graham.tech)
 
 ---
 
@@ -24,6 +25,37 @@ Metasquares is a turn-based game played on a grid where players compete to form 
 ### 📐 Scoring
 
 Each square gives points based on how spread out the points are. The further apart the points in the square, the more points you earn. Squares can be tilted, and the size is calculated by the size of the square the points have been offset from. For example, in a 3x3 grid, if the middles of each side are chosen then the diamond-looking square that is formed is still worth 9 points. For a 4x4 grid there are two other offset squares at different angles that each are worth 16 points. 
+
+---
+
+## 🏗️ Monorepo Structure
+
+This project uses **npm workspaces** to manage multiple packages:
+
+```
+metasquares/
+├── apps/
+│   ├── web/          # TanStack Start web application
+│   └── mobile/       # React Native (Expo) mobile app
+├── packages/
+│   ├── shared/       # Shared types and game logic
+│   └── convex/       # Shared Convex backend
+```
+
+### Development
+
+```bash
+# Install all dependencies
+npm install
+
+# Run web app
+npm run dev:web
+
+# Run mobile app
+npm run dev:mobile
+```
+
+See [CLAUDE.MD](CLAUDE.MD) for detailed documentation.
 
 ---
 

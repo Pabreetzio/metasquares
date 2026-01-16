@@ -2,9 +2,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { GameBoard } from './GameBoard.js';
-import { Player } from '../types/Player.types.js';
-import { Square } from '../types/Square.types.js';
-import { MetaSquare } from '../types/MetaSquare.types.js';
+import { Player, Square, MetaSquare } from '@metasquares/shared';
 
 export function Game() {
         const [boardState, setBoardState] = useState(Array(8).fill(Player.None).map(() => Array(8).fill(Player.None)));

@@ -1,4 +1,4 @@
-import { Player } from '../types/Player.types.js';
+import { Player } from '@metasquares/shared';
 
 export function PlayerMarble({row, col, player}: {row: number, col: number, player: Player}) {
     const cx = 25 + col * 50;

@@ -1,0 +1,7 @@
+{
+  "name": "@metasquares/convex",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./convex.config.js",
+  "types": "./_generated/api.d.ts"
+}

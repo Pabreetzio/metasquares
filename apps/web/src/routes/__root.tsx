@@ -14,6 +14,8 @@ import {
   UserButton,
 } from '@clerk/tanstack-react-start'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { QueryClient } from '@tanstack/react-query'
+import { createRootRouteWithContext } from "@tanstack/react-router";
 import { createServerFn } from '@tanstack/react-start'
 import * as React from 'react'
 import { getAuth } from '@clerk/tanstack-react-start/server'
@@ -30,7 +32,9 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
   }
 })
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+}>()({
   head: () => ({
     meta: [
       {

@@ -15,7 +15,9 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "@metasquares/convex/*": ["../../packages/convex/*"],
+      "@metasquares/shared": ["../../packages/shared/src/index.ts"]
     },
     "noEmit": true
   }

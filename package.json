@@ -1,32 +1,18 @@
 {
-  "name": "tanstack-start-example-clerk-basic",
+  "name": "metasquares",
+  "version": "1.0.0",
   "private": true,
-  "sideEffects": false,
-  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vinxi dev",
-    "build": "vinxi build",
-    "start": "vinxi start"
-  },
-  "dependencies": {
-    "@clerk/tanstack-react-start": "0.12.0",
-    "@tanstack/react-router": "^1.120.2",
-    "@tanstack/react-router-devtools": "^1.120.2",
-    "@tanstack/react-start": "^1.120.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "redaxios": "^0.5.1",
-    "tailwind-merge": "^2.6.0",
-    "vinxi": "0.5.3"
+    "dev:web": "npm run dev --workspace=@metasquares/web",
+    "build:web": "npm run build --workspace=@metasquares/web",
+    "dev:mobile": "npm run start --workspace=@metasquares/mobile",
+    "install:all": "npm install"
   },
   "devDependencies": {
-    "@types/node": "^22.5.4",
-    "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
-    "postcss": "^8.5.1",
-    "autoprefixer": "^10.4.20",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.2",
-    "vite-tsconfig-paths": "^5.1.4"
+    "typescript": "^5.7.2"
   }
 }

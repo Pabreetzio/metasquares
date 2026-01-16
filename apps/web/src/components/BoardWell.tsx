@@ -1,4 +1,4 @@
-import { Player } from '../types/Player.types.js';
+import { Player } from '@metasquares/shared';
 
 export function BoardWell({row, col}: {row: number, col: number}) {
     const cx = 25 + col * 50;

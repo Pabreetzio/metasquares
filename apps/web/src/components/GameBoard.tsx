@@ -4,8 +4,7 @@ import { WellHitbox } from "./WellHitbox";
 import { PlayerMarble } from "./PlayerMarble";
 import { useState } from 'react';   
 
-import { Player } from '../types/Player.types.js';
-import { MetaSquare } from '../types/MetaSquare.types.js';
+import { Player, MetaSquare } from '@metasquares/shared';
 
 export function GameBoard({boardState, metaSquares, onPlay, winner, onNewGame} : 
   {boardState: Player[][], metaSquares: MetaSquare[], onPlay: (row: number, col: number) => void, winner: string | null, onNewGame: () => void}) {
